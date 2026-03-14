@@ -81,6 +81,15 @@
         {
             "name": "带Custom的任务",
             "entry": "MyTask4"
+        },
+        {
+            "name": "DeltaStore",
+            "label": "DeltaStore（商店购买）",
+            "entry": "CheckStatus",
+            "description": "检查状态后自动购买",
+            "option": [
+                "Purchase前置延迟"
+            ]
         }
     ],
     "option": {
@@ -102,8 +111,27 @@
                             "text": "文本2"
                         }
                     }
-                }
+                },
             ]
+        },
+        "Purchase前置延迟": {
+            "type": "input",
+            "label": "Purchase 前置延迟 (ms)",
+            "description": "配置 Purchase 步骤执行前的等待时间（毫秒）",
+            "inputs": [
+                {
+                    "name": "PreDelay",
+                    "label": "延迟时间 (ms)",
+                    "default": "0",
+                    "pipeline_type": "int",
+                    "verify": "^\\d+$"
+                }
+            ],
+            "pipeline_override": {
+                "Purchase": {
+                    "pre_delay": "{PreDelay}"
+                }
+            }
         }
     }
 }

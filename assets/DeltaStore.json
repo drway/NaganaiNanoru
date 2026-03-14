@@ -1,0 +1,80 @@
+{
+    "$__mpe_config_DeltaStore": {
+        "$__mpe_code": {
+            "filePath": "E:\\delta\\Delta\\assets\\DeltaStore.json",
+            "filename": "DeltaStore",
+            "lastSyncTime": 1773493634473,
+            "prefix": "",
+            "savedViewport": {
+                "x": 1743,
+                "y": 371,
+                "zoom": 1
+            },
+            "version": "v1.2.3"
+        }
+    },
+    "CheckStatus": {
+        "$__mpe_code": {
+            "position": {
+                "x": -1434,
+                "y": 4
+            }
+        },
+        "action": {
+            "param": {
+                "target": [
+                    1046,
+                    609,
+                    82,
+                    24
+                ]
+            },
+            "type": "Click"
+        },
+        "next": [
+            "Purchase"
+        ],
+        "post_delay": 0,
+        "pre_delay": 0,
+        "rate_limit": 100,
+        "recognition": {
+            "param": {
+                "template": [
+                    "三角币.png"
+                ]
+            },
+            "type": "TemplateMatch"
+        },
+        "timeout": -1
+    },
+    "Purchase": {
+        "$__mpe_code": {
+            "position": {
+                "x": -1174,
+                "y": 19
+            }
+        },
+        "action": {
+            "param": {
+                "target": [
+                    781,
+                    454,
+                    63,
+                    25
+                ]
+            },
+            "type": "Click"
+        },
+        "post_delay": 0,
+        "pre_delay": "{PreDelay}",
+        "rate_limit": 50,
+        "recognition": {
+            "param": {
+                "template": [
+                    "0秒.png"
+                ]
+            },
+            "type": "TemplateMatch"
+        }
+    }
+}
