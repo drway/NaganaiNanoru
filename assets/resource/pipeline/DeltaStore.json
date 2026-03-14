@@ -1,13 +1,14 @@
 {
     "$__mpe_config_DeltaStore": {
         "$__mpe_code": {
-            "filePath": "E:\\delta\\Delta\\assets\\DeltaStore.json",
+            "filePath": "E:\\delta\\Delta\\assets\\resource\\pipeline\\DeltaStore.json",
             "filename": "DeltaStore",
-            "lastSyncTime": 1773493634473,
+            "isModifiedExternally": false,
+            "lastSyncTime": 1773499420935,
             "prefix": "",
             "savedViewport": {
-                "x": 1743,
-                "y": 371,
+                "x": 2214,
+                "y": 291,
                 "zoom": 1
             },
             "version": "v1.2.3"
@@ -39,6 +40,12 @@
         "rate_limit": 100,
         "recognition": {
             "param": {
+                "roi": [
+                    984,
+                    604,
+                    209,
+                    35
+                ],
                 "template": [
                     "三角币.png"
                 ]
@@ -66,10 +73,16 @@
             "type": "Click"
         },
         "post_delay": 0,
-        "pre_delay": "{PreDelay}",
+        "pre_delay": 700,
         "rate_limit": 50,
         "recognition": {
             "param": {
+                "roi": [
+                    753,
+                    420,
+                    119,
+                    22
+                ],
                 "template": [
                     "0秒.png"
                 ]
