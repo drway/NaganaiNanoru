@@ -4,12 +4,12 @@
             "filePath": "E:\\delta\\Delta\\assets\\resource\\pipeline\\DeltaStore.json",
             "filename": "DeltaStore",
             "isModifiedExternally": false,
-            "lastSyncTime": 1773499420935,
+            "lastSyncTime": 1773499432423,
             "prefix": "",
             "savedViewport": {
-                "x": 2214,
-                "y": 291,
-                "zoom": 1
+                "x": 3149,
+                "y": 100,
+                "zoom": 2
             },
             "version": "v1.2.3"
         }
@@ -78,10 +78,10 @@
         "recognition": {
             "param": {
                 "roi": [
-                    753,
-                    420,
-                    119,
-                    22
+                    788,
+                    425,
+                    25,
+                    11
                 ],
                 "template": [
                     "0秒.png"
