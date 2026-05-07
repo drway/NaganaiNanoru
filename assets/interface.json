@@ -44,13 +44,12 @@
             ]
         }
     ],
-    // 可选的 agent 示例
-    // "agent": {
-    //     "child_exec": "python",
-    //     "child_args": [
-    //         "./agent/main.py"
-    //     ]
-    // },
+    "agent": {
+        "child_exec": "python",
+        "child_args": [
+            "./agent/main.py"
+        ]
+    },
     "task": [
         {
             "name": "DeltaStore",
@@ -58,7 +57,8 @@
             "entry": "CheckStatus",
             "description": "检查状态后自动购买",
             "option": [
-                "Purchase前置延迟"
+                "Purchase前置延迟",
+                "SmartClick设置"
             ]
         }
     ],
@@ -79,6 +79,152 @@
             "pipeline_override": {
                 "Purchase": {
                     "pre_delay": "{PreDelay}"
+                }
+            }
+        },
+        "SmartClick设置": {
+            "type": "input",
+            "label": "SmartClick点击延迟及对时设置",
+            "description": "针对使用SmartClick自定义动作的任务配置随机延迟区间及触发时间。请在任务流水线中将需要此策略的节点命名为 SmartClickNode 或自行在此修改对应的流水线覆盖节点名。",
+            "inputs": [
+                {
+                    "name": "TargetTime",
+                    "label": "目标点击时间(空代表不等待)",
+                    "default": "",
+                    "pipeline_type": "string"
+                },
+                {
+                    "name": "FixedEnabled",
+                    "label": "启用固定延迟(1开启/0关闭)",
+                    "default": "0",
+                    "pipeline_type": "int"
+                },
+                {
+                    "name": "FixedDelay",
+                    "label": "固定延迟(ms)",
+                    "default": "850",
+                    "pipeline_type": "int"
+                },
+                {
+                    "name": "UltraLowEnabled",
+                    "label": "超低区间启用(1/0)",
+                    "default": "1",
+                    "pipeline_type": "int"
+                },
+                {
+                    "name": "UltraLowMin",
+                    "label": "超低区间下限",
+                    "default": "800",
+                    "pipeline_type": "int"
+                },
+                {
+                    "name": "UltraLowMax",
+                    "label": "超低区间上限",
+                    "default": "820",
+                    "pipeline_type": "int"
+                },
+                {
+                    "name": "UltraLowWeight",
+                    "label": "超低区间权重",
+                    "default": "1",
+                    "pipeline_type": "int"
+                },
+                {
+                    "name": "LowEnabled",
+                    "label": "低区间启用(1/0)",
+                    "default": "1",
+                    "pipeline_type": "int"
+                },
+                {
+                    "name": "LowMin",
+                    "label": "低区间下限",
+                    "default": "820",
+                    "pipeline_type": "int"
+                },
+                {
+                    "name": "LowMax",
+                    "label": "低区间上限",
+                    "default": "840",
+                    "pipeline_type": "int"
+                },
+                {
+                    "name": "LowWeight",
+                    "label": "低区间权重",
+                    "default": "2",
+                    "pipeline_type": "int"
+                },
+                {
+                    "name": "MidEnabled",
+                    "label": "中区间启用(1/0)",
+                    "default": "1",
+                    "pipeline_type": "int"
+                },
+                {
+                    "name": "MidMin",
+                    "label": "中区间下限",
+                    "default": "840",
+                    "pipeline_type": "int"
+                },
+                {
+                    "name": "MidMax",
+                    "label": "中区间上限",
+                    "default": "860",
+                    "pipeline_type": "int"
+                },
+                {
+                    "name": "MidWeight",
+                    "label": "中区间权重",
+                    "default": "3",
+                    "pipeline_type": "int"
+                },
+                {
+                    "name": "HighEnabled",
+                    "label": "高区间启用(1/0)",
+                    "default": "1",
+                    "pipeline_type": "int"
+                },
+                {
+                    "name": "HighMin",
+                    "label": "高区间下限",
+                    "default": "860",
+                    "pipeline_type": "int"
+                },
+                {
+                    "name": "HighMax",
+                    "label": "高区间上限",
+                    "default": "880",
+                    "pipeline_type": "int"
+                },
+                {
+                    "name": "HighWeight",
+                    "label": "高区间权重",
+                    "default": "1",
+                    "pipeline_type": "int"
+                }
+            ],
+            "pipeline_override": {
+                "SmartClickNode": {
+                    "custom_action_param": {
+                        "target_time": "{TargetTime}",
+                        "fixed_enabled": "{FixedEnabled}",
+                        "fixed_delay": "{FixedDelay}",
+                        "ultra_low_enabled": "{UltraLowEnabled}",
+                        "ultra_low_min": "{UltraLowMin}",
+                        "ultra_low_max": "{UltraLowMax}",
+                        "ultra_low_weight": "{UltraLowWeight}",
+                        "low_enabled": "{LowEnabled}",
+                        "low_min": "{LowMin}",
+                        "low_max": "{LowMax}",
+                        "low_weight": "{LowWeight}",
+                        "mid_enabled": "{MidEnabled}",
+                        "mid_min": "{MidMin}",
+                        "mid_max": "{MidMax}",
+                        "mid_weight": "{MidWeight}",
+                        "high_enabled": "{HighEnabled}",
+                        "high_min": "{HighMin}",
+                        "high_max": "{HighMax}",
+                        "high_weight": "{HighWeight}"
+                    }
                 }
             }
         }

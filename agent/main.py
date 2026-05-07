@@ -5,7 +5,7 @@ from maa.toolkit import Toolkit
 
 import my_action
 import my_reco
-
+import smart_click
 
 def main():
     Toolkit.init_option("./")
