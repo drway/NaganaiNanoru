@@ -63,6 +63,7 @@
         },
         "action": {
             "param": {
+                "custom_action": "SmartClick",
                 "target": [
                     781,
                     454,
@@ -70,7 +71,6 @@
                     25
                 ]
             },
-            "custom_action": "SmartClick",
             "type": "Custom"
         },
         "post_delay": 0,

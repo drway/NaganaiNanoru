@@ -184,26 +184,30 @@
             ],
             "pipeline_override": {
                 "Purchase": {
-                    "custom_action_param": {
-                        "target_time": "{TargetTime}",
-                        "fixed_enabled": "{FixedEnabled}",
-                        "fixed_delay": "{FixedDelay}",
-                        "ultra_low_enabled": "{UltraLowEnabled}",
-                        "ultra_low_min": "{UltraLowMin}",
-                        "ultra_low_max": "{UltraLowMax}",
-                        "ultra_low_weight": "{UltraLowWeight}",
-                        "low_enabled": "{LowEnabled}",
-                        "low_min": "{LowMin}",
-                        "low_max": "{LowMax}",
-                        "low_weight": "{LowWeight}",
-                        "mid_enabled": "{MidEnabled}",
-                        "mid_min": "{MidMin}",
-                        "mid_max": "{MidMax}",
-                        "mid_weight": "{MidWeight}",
-                        "high_enabled": "{HighEnabled}",
-                        "high_min": "{HighMin}",
-                        "high_max": "{HighMax}",
-                        "high_weight": "{HighWeight}"
+                    "action": {
+                        "param": {
+                            "custom_action_param": {
+                                "target_time": "{TargetTime}",
+                                "fixed_enabled": "{FixedEnabled}",
+                                "fixed_delay": "{FixedDelay}",
+                                "ultra_low_enabled": "{UltraLowEnabled}",
+                                "ultra_low_min": "{UltraLowMin}",
+                                "ultra_low_max": "{UltraLowMax}",
+                                "ultra_low_weight": "{UltraLowWeight}",
+                                "low_enabled": "{LowEnabled}",
+                                "low_min": "{LowMin}",
+                                "low_max": "{LowMax}",
+                                "low_weight": "{LowWeight}",
+                                "mid_enabled": "{MidEnabled}",
+                                "mid_min": "{MidMin}",
+                                "mid_max": "{MidMax}",
+                                "mid_weight": "{MidWeight}",
+                                "high_enabled": "{HighEnabled}",
+                                "high_min": "{HighMin}",
+                                "high_max": "{HighMax}",
+                                "high_weight": "{HighWeight}"
+                            }
+                        }
                     }
                 }
             }
