@@ -6,7 +6,13 @@
       "PowerShell(cmd /c \"dir /a E:\\\\delta\")",
       "PowerShell(cmd /c \"dir /a /s E:\\\\delta\\\\log_20260508_182357\")",
       "PowerShell(& \"C:\\\\ProgramData\\\\anaconda3\\\\python.exe\" -c \"from maa.define import Rect; import inspect; print\\(inspect.getsource\\(Rect\\)\\)\")",
-      "PowerShell(& \"C:\\\\ProgramData\\\\anaconda3\\\\python.exe\" -c \"from maa.custom_recognition import CustomRecognition; import inspect; print\\(inspect.getsource\\(CustomRecognition.AnalyzeArg\\)\\)\")"
+      "PowerShell(& \"C:\\\\ProgramData\\\\anaconda3\\\\python.exe\" -c \"from maa.custom_recognition import CustomRecognition; import inspect; print\\(inspect.getsource\\(CustomRecognition.AnalyzeArg\\)\\)\")",
+      "Bash(Get-ChildItem -Path \"E:\\\\delta\\\\log_20260508_191237\" -Recurse -Force)",
+      "Bash(Select-Object FullName, PSIsContainer)",
+      "Bash(Format-List)",
+      "Bash(Get-ChildItem -Path \"C:\\\\Users\\\\wzy02\\\\Downloads\\\\MaaDelta-win-x86_64\\\\\" -ErrorAction SilentlyContinue | Select-Object Name, PSIsContainer)",
+      "PowerShell(cmd /c \"dir /a /b \"\"C:\\\\Users\\\\wzy02\\\\Downloads\\\\MaaDelta-win-x86_64\"\"\")",
+      "PowerShell(cmd /c \"dir /a /b /s \"\"C:\\\\Users\\\\wzy02\\\\Downloads\\\\MaaDelta-win-x86_64\\\\runtimes\"\"\")"
     ]
   }
 }
