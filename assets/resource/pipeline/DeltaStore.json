@@ -39,7 +39,8 @@
             "type": "Custom",
             "param": {
                 "custom_recognition": "CountdownOCR",
-                "roi": [1033, 583, 111, 16]
+                "roi": [1033, 583, 111, 16],
+                "custom_recognition_param": {"refresh_target": "[917, 117]"}
             }
         },
         "action": {

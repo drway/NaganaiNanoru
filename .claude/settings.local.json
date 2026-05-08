@@ -1,0 +1,12 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(ls -la /mnt/e/delta/)",
+      "Read(//mnt/e/**)",
+      "PowerShell(cmd /c \"dir /a E:\\\\delta\")",
+      "PowerShell(cmd /c \"dir /a /s E:\\\\delta\\\\log_20260508_182357\")",
+      "PowerShell(& \"C:\\\\ProgramData\\\\anaconda3\\\\python.exe\" -c \"from maa.define import Rect; import inspect; print\\(inspect.getsource\\(Rect\\)\\)\")",
+      "PowerShell(& \"C:\\\\ProgramData\\\\anaconda3\\\\python.exe\" -c \"from maa.custom_recognition import CustomRecognition; import inspect; print\\(inspect.getsource\\(CustomRecognition.AnalyzeArg\\)\\)\")"
+    ]
+  }
+}

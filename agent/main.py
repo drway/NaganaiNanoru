@@ -20,10 +20,6 @@ if target_bin != "./" and os.path.exists(target_bin):
         os.add_dll_directory(target_bin)
 
 from maa.agent.agent_server import AgentServer
-from maa.toolkit import Toolkit
-
-# 初始化 Toolkit 指向正确的 DLL 目录
-Toolkit.init_option(target_bin)
 
 import my_action
 import my_reco

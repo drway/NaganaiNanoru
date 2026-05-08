@@ -1,4 +1,5 @@
 import re
+import json
 import time
 import datetime
 import smart_click
@@ -46,6 +47,19 @@ class CountdownOCR(CustomRecognition):
         argv: CustomRecognition.AnalyzeArg,
     ) -> CustomRecognition.AnalyzeResult:
 
+        # 解析 custom_recognition_param 以获取刷新区域坐标
+        reco_param = {}
+        if argv.custom_recognition_param:
+            try:
+                reco_param = json.loads(argv.custom_recognition_param)
+            except Exception:
+                pass
+        refresh_raw = reco_param.get('refresh_target', '[917, 117]')
+        if isinstance(refresh_raw, str):
+            refresh_target = json.loads(refresh_raw)
+        else:
+            refresh_target = refresh_raw
+
         # 使用 MaaFW 内置 OCR 识别倒计时区域
         reco_detail = context.run_recognition(
             "CountdownOCRInternal",
@@ -63,17 +77,10 @@ class CountdownOCR(CustomRecognition):
             }
         )
 
-        if not reco_detail:
+        if not reco_detail or not reco_detail.best_result:
             return None
 
-        # 提取 OCR 识别到的文本
-        text = ""
-        if hasattr(reco_detail, 'detail'):
-            text = str(reco_detail.detail)
-        elif hasattr(reco_detail, 'text'):
-            text = str(reco_detail.text)
-        else:
-            text = str(reco_detail)
+        text = reco_detail.best_result.text
 
         total_seconds = parse_countdown(text)
         if total_seconds is None:
@@ -90,8 +97,7 @@ class CountdownOCR(CustomRecognition):
         if total_seconds in [16, 12, 7]:
             print(f"[CountdownOCR] 倒计时{total_seconds}秒，触发刷新")
             try:
-                # 刷新区域中心点 (720p): (917, 117)
-                context.tasker.controller.post_click(917, 117).wait()
+                context.tasker.controller.post_click(refresh_target[0], refresh_target[1]).wait()
             except Exception as e:
                 print(f"[CountdownOCR] 刷新点击失败: {e}")
             return None  # 还不到触发时机，继续监控
@@ -107,13 +113,12 @@ class CountdownOCR(CustomRecognition):
             sale_ts = int(clock.get_real_timestamp())
             print(f"[CountdownOCR] 记录3秒整秒时刻: {datetime.datetime.fromtimestamp(sale_ts)}")
 
-            # 写入共享变量供 SmartClick 使用
-            # target_ts = 3秒时刻 + 3秒（等到0秒）
-            # 延迟由 SmartClick 自行添加
-            smart_click.ocr_sale_ts = sale_ts
-            smart_click.ocr_target_base_ts = sale_ts + 3.0
+            # 写入共享变量供 SmartClick 使用（加锁保护）
+            with smart_click._ocr_lock:
+                smart_click.ocr_sale_ts = sale_ts
+                smart_click.ocr_target_base_ts = sale_ts + 3.0
 
-            box = reco_detail.box if hasattr(reco_detail, 'box') else (0, 0, 100, 100)
+            box = reco_detail.best_result.box
             return CustomRecognition.AnalyzeResult(
                 box=box,
                 detail=f"countdown_3s_sale_ts={sale_ts}"

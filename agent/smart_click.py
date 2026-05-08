@@ -14,6 +14,7 @@ _calculator = DelayCalculator()
 # 模块级共享变量：由 CountdownOCR 识别器写入
 ocr_sale_ts = None          # OCR 检测到3秒时的时间戳
 ocr_target_base_ts = None   # sale_ts + 3.0（即0秒时刻的时间戳）
+_ocr_lock = threading.Lock()
 
 
 def _precise_sleep(duration: float):
@@ -139,14 +140,18 @@ class SmartClickAction(CustomAction):
         target_ts = None
         sale_ts = None
 
-        if ocr_target_base_ts is not None:
+        with _ocr_lock:
+            _ocr_base = ocr_target_base_ts
+            _ocr_sale = ocr_sale_ts
+            if ocr_target_base_ts is not None:
+                ocr_sale_ts = None
+                ocr_target_base_ts = None
+
+        if _ocr_base is not None:
             # OCR 模式：target = 0秒时刻 + 用户延迟
-            sale_ts = ocr_sale_ts
-            target_ts = ocr_target_base_ts + user_delay_sec
+            sale_ts = _ocr_sale
+            target_ts = _ocr_base + user_delay_sec
             print(f"[SmartClick] 使用 OCR 推算: sale_ts={sale_ts}, target_ts={target_ts}")
-            # 消费掉共享变量
-            ocr_sale_ts = None
-            ocr_target_base_ts = None
         else:
             # 手动模式：用户输入 target_time
             target_time_str = param.get('target_time', '')
@@ -164,8 +169,8 @@ class SmartClickAction(CustomAction):
                     if (now_time - target_dt).total_seconds() > 3600:
                         target_dt += datetime.timedelta(days=1)
                     sale_ts = clock.get_real_timestamp()
-                    target_ts = (target_dt - datetime.datetime(1970, 1, 1)).total_seconds()
-                    target_ts += user_delay_sec
+                    delta_sec = (target_dt - now_time).total_seconds()
+                    target_ts = sale_ts + delta_sec + user_delay_sec
                     print(f"[SmartClick] 使用手动输入: target_dt={target_dt}, delay={user_delay_ms}ms")
                 except Exception as e:
                     print(f"[SmartClick] 解析手动 target_time 失败: {e}")

@@ -213,6 +213,15 @@
                 }
             ],
             "pipeline_override": {
+                "CountdownMonitor": {
+                    "recognition": {
+                        "param": {
+                            "custom_recognition_param": {
+                                "refresh_target": "{RefreshTarget}"
+                            }
+                        }
+                    }
+                },
                 "Purchase": {
                     "action": {
                         "param": {
