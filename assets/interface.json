@@ -49,8 +49,8 @@
         {
             "name": "DeltaStore",
             "label": "DeltaStore（商店购买）",
-            "entry": "CheckStatus",
-            "description": "检查状态后自动购买",
+            "entry": "CountdownMonitor",
+            "description": "监控倒计时并自动购买",
             "option": [
                 "SmartClick设置"
             ]
@@ -62,12 +62,6 @@
             "label": "SmartClick点击延迟及对时设置",
             "description": "针对使用SmartClick自定义动作的任务配置随机延迟区间及触发时间。请在任务流水线中将需要此策略的节点命名为 SmartClickNode 或自行在此修改对应的流水线覆盖节点名。",
             "inputs": [
-                {
-                    "name": "TargetTime",
-                    "label": "目标点击时间(留空=由OCR自动推算)",
-                    "default": "",
-                    "pipeline_type": "string"
-                },
                 {
                     "name": "JumpTimeEnabled",
                     "label": "启用系统时间跳跃(1开启/0关闭，需管理员权限)",
@@ -181,30 +175,6 @@
                     "label": "高区间权重",
                     "default": "1",
                     "pipeline_type": "int"
-                },
-                {
-                    "name": "ConfirmTarget",
-                    "label": "确认区域中心点[x,y](720p)",
-                    "default": "[1088, 622]",
-                    "pipeline_type": "string"
-                },
-                {
-                    "name": "SecondConfirmTarget",
-                    "label": "二次确认区域中心点[x,y](720p)",
-                    "default": "[815, 467]",
-                    "pipeline_type": "string"
-                },
-                {
-                    "name": "ExitTarget",
-                    "label": "退出区域中心点[x,y](720p)",
-                    "default": "[649, 630]",
-                    "pipeline_type": "string"
-                },
-                {
-                    "name": "RefreshTarget",
-                    "label": "刷新区域中心点[x,y](720p)",
-                    "default": "[917, 117]",
-                    "pipeline_type": "string"
                 }
             ],
             "pipeline_override": {
@@ -212,7 +182,7 @@
                     "recognition": {
                         "param": {
                             "custom_recognition_param": {
-                                "refresh_target": "{RefreshTarget}"
+                                "refresh_target": "[905, 107, 23, 21]"
                             }
                         }
                     }
@@ -221,7 +191,6 @@
                     "action": {
                         "param": {
                             "custom_action_param": {
-                                "target_time": "{TargetTime}",
                                 "jump_time_enabled": "{JumpTimeEnabled}",
                                 "fixed_enabled": "{FixedEnabled}",
                                 "fixed_delay": "{FixedDelay}",
@@ -241,10 +210,10 @@
                                 "high_min": "{HighMin}",
                                 "high_max": "{HighMax}",
                                 "high_weight": "{HighWeight}",
-                                "confirm_target": "{ConfirmTarget}",
-                                "second_confirm_target": "{SecondConfirmTarget}",
-                                "exit_target": "{ExitTarget}",
-                                "refresh_target": "{RefreshTarget}"
+                                "confirm_target": "[1019, 606, 133, 28]",
+                                "second_confirm_target": "[761, 451, 104, 28]",
+                                "exit_target": "[649, 630]",
+                                "refresh_target": "[905, 107, 23, 21]"
                             }
                         }
                     }

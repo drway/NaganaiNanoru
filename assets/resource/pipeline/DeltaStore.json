@@ -1,39 +1,4 @@
 {
-    "CheckStatus": {
-        "action": {
-            "param": {
-                "target": [
-                    1046,
-                    609,
-                    82,
-                    24
-                ]
-            },
-            "type": "Click"
-        },
-        "next": [
-            "CountdownMonitor"
-        ],
-        "post_delay": 0,
-        "pre_delay": 0,
-        "rate_limit": 100,
-        "recognition": {
-            "param": {
-                "roi": [
-                    984,
-                    604,
-                    209,
-                    35
-                ],
-                "template": [
-                    "三角币.png"
-                ]
-            },
-            "type": "TemplateMatch"
-        },
-        "timeout": -1
-    },
-
     "CountdownMonitor": {
         "recognition": {
             "type": "Custom",

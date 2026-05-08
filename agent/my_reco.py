@@ -54,7 +54,7 @@ class CountdownOCR(CustomRecognition):
                 reco_param = json.loads(argv.custom_recognition_param)
             except Exception:
                 pass
-        refresh_raw = reco_param.get('refresh_target', '[917, 117]')
+        refresh_raw = reco_param.get('refresh_target', '[905, 107, 23, 21]')
         if isinstance(refresh_raw, str):
             refresh_target = json.loads(refresh_raw)
         else:
@@ -97,7 +97,9 @@ class CountdownOCR(CustomRecognition):
         if total_seconds in [16, 12, 7]:
             print(f"[CountdownOCR] 倒计时{total_seconds}秒，触发刷新")
             try:
-                context.tasker.controller.post_click(refresh_target[0], refresh_target[1]).wait()
+                _rx = refresh_target[0] + (refresh_target[2] // 2 if len(refresh_target) == 4 else 0)
+                _ry = refresh_target[1] + (refresh_target[3] // 2 if len(refresh_target) == 4 else 0)
+                context.tasker.controller.post_click(_rx, _ry).wait()
             except Exception as e:
                 print(f"[CountdownOCR] 刷新点击失败: {e}")
             return None  # 还不到触发时机，继续监控

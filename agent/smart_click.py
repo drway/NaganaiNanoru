@@ -121,10 +121,17 @@ class SmartClickAction(CustomAction):
         }
 
         # --- 区域坐标 (720p) ---
-        confirm_center = json.loads(param.get('confirm_target', '[1088, 622]'))
-        second_confirm_center = json.loads(param.get('second_confirm_target', '[815, 467]'))
-        exit_center = json.loads(param.get('exit_target', '[649, 630]'))
-        refresh_center = json.loads(param.get('refresh_target', '[917, 117]'))
+        # 支持 [x, y] 或 [x, y, w, h]；后者在框内随机取点
+        def _rand_xy(rect):
+            if len(rect) == 4:
+                x, y, w, h = rect
+                return x + random.randint(0, max(0, w - 1)), y + random.randint(0, max(0, h - 1))
+            return rect[0], rect[1]
+
+        confirm_target = json.loads(param.get('confirm_target', '[1019, 606, 133, 28]'))
+        second_confirm_target = json.loads(param.get('second_confirm_target', '[761, 451, 104, 28]'))
+        exit_target = json.loads(param.get('exit_target', '[649, 630]'))
+        refresh_target = json.loads(param.get('refresh_target', '[905, 107, 23, 21]'))
 
         # --- jump_time 开关 ---
         jump_enabled = str(param.get('jump_time_enabled', '0')) == '1'
@@ -135,11 +142,7 @@ class SmartClickAction(CustomAction):
         user_delay_sec = user_delay_ms / 1000.0
         print(f"[SmartClick] 选择模式: {chosen_range}, 延迟: {user_delay_ms}ms")
 
-        # --- 计算目标时间戳 ---
-        # 优先使用 OCR 推算的 target_base_ts，其次使用用户手动输入
-        target_ts = None
-        sale_ts = None
-
+        # --- 从 OCR 获取目标时间戳 ---
         with _ocr_lock:
             _ocr_base = ocr_target_base_ts
             _ocr_sale = ocr_sale_ts
@@ -147,52 +150,20 @@ class SmartClickAction(CustomAction):
                 ocr_sale_ts = None
                 ocr_target_base_ts = None
 
-        if _ocr_base is not None:
-            # OCR 模式：target = 0秒时刻 + 用户延迟
-            sale_ts = _ocr_sale
-            target_ts = _ocr_base + user_delay_sec
-            print(f"[SmartClick] 使用 OCR 推算: sale_ts={sale_ts}, target_ts={target_ts}")
-        else:
-            # 手动模式：用户输入 target_time
-            target_time_str = param.get('target_time', '')
-            if target_time_str:
-                try:
-                    now_time = clock.now()
-                    time_parts = target_time_str.replace(',', '.').split('.')
-                    hms = time_parts[0]
-                    ms = int(time_parts[1]) if len(time_parts) > 1 else 0
-                    parsed_time = datetime.datetime.strptime(hms, "%H:%M:%S")
-                    target_dt = now_time.replace(
-                        hour=parsed_time.hour, minute=parsed_time.minute,
-                        second=parsed_time.second, microsecond=ms * 1000
-                    )
-                    if (now_time - target_dt).total_seconds() > 3600:
-                        target_dt += datetime.timedelta(days=1)
-                    sale_ts = clock.get_real_timestamp()
-                    delta_sec = (target_dt - now_time).total_seconds()
-                    target_ts = sale_ts + delta_sec + user_delay_sec
-                    print(f"[SmartClick] 使用手动输入: target_dt={target_dt}, delay={user_delay_ms}ms")
-                except Exception as e:
-                    print(f"[SmartClick] 解析手动 target_time 失败: {e}")
+        if _ocr_base is None:
+            print("[SmartClick] OCR 时间戳未就绪，跳过本次")
+            return False
 
-        if target_ts is None:
-            # 无目标时间，直接延迟后点击
-            print(f"[SmartClick] 无目标时间，直接延迟 {user_delay_ms}ms 后点击")
-            _precise_sleep(user_delay_sec)
-            box = argv.box
-            if box and box.width > 0:
-                cx = box.x + random.randint(0, box.width - 1)
-                cy = box.y + random.randint(0, box.height - 1)
-            else:
-                cx, cy = second_confirm_center
-            context.tasker.controller.post_click(cx, cy).wait()
-            return True
+        sale_ts = _ocr_sale
+        target_ts = _ocr_base + user_delay_sec
+        print(f"[SmartClick] OCR 推算: sale_ts={sale_ts}, target_ts={target_ts}")
 
         # ========== 还原原版完整抢购流程 ==========
 
         # Step 1: 点击"确认区域"（预操作）
-        print(f"[SmartClick] Step1: 点击确认区域 {confirm_center}")
-        context.tasker.controller.post_click(confirm_center[0], confirm_center[1]).wait()
+        print(f"[SmartClick] Step1: 点击确认区域 {confirm_target}")
+        _cx, _cy = _rand_xy(confirm_target)
+        context.tasker.controller.post_click(_cx, _cy).wait()
 
         # Step 2: 日志
         print(f"[SmartClick] 目标真实时刻: {datetime.datetime.fromtimestamp(target_ts)}")
@@ -220,10 +191,9 @@ class SmartClickAction(CustomAction):
             # < 10ms 时忙等待（空转）
 
         # Step 4: 精确时刻到达 → 点击"二次确认区域"
-        print(f"[SmartClick] Step4: 精确时刻到达，点击二次确认区域 {second_confirm_center}")
-        context.tasker.controller.post_click(
-            second_confirm_center[0], second_confirm_center[1]
-        ).wait()
+        print(f"[SmartClick] Step4: 精确时刻到达，点击二次确认区域 {second_confirm_target}")
+        _cx, _cy = _rand_xy(second_confirm_target)
+        context.tasker.controller.post_click(_cx, _cy).wait()
 
         # 记录误差日志
         actual_ts = clock.get_real_timestamp()
@@ -238,13 +208,15 @@ class SmartClickAction(CustomAction):
 
         # Step 5: 点击"退出区域"
         time.sleep(0.1)
-        print(f"[SmartClick] Step5: 点击退出区域 {exit_center}")
-        context.tasker.controller.post_click(exit_center[0], exit_center[1]).wait()
+        print(f"[SmartClick] Step5: 点击退出区域 {exit_target}")
+        _cx, _cy = _rand_xy(exit_target)
+        context.tasker.controller.post_click(_cx, _cy).wait()
 
         # Step 6: 等待后点击"刷新区域"，NTP 重同步
         time.sleep(3.0)
-        print(f"[SmartClick] Step6: 点击刷新区域 {refresh_center}")
-        context.tasker.controller.post_click(refresh_center[0], refresh_center[1]).wait()
+        print(f"[SmartClick] Step6: 点击刷新区域 {refresh_target}")
+        _cx, _cy = _rand_xy(refresh_target)
+        context.tasker.controller.post_click(_cx, _cy).wait()
 
         # NTP 重同步
         try:
