@@ -1,26 +1,5 @@
 {
-    "$__mpe_config_DeltaStore": {
-        "$__mpe_code": {
-            "filePath": "E:\\delta\\Delta\\assets\\resource\\pipeline\\DeltaStore.json",
-            "filename": "DeltaStore",
-            "isModifiedExternally": false,
-            "lastSyncTime": 1773499432423,
-            "prefix": "",
-            "savedViewport": {
-                "x": 3149,
-                "y": 100,
-                "zoom": 2
-            },
-            "version": "v1.2.3"
-        }
-    },
     "CheckStatus": {
-        "$__mpe_code": {
-            "position": {
-                "x": -1434,
-                "y": 4
-            }
-        },
         "action": {
             "param": {
                 "target": [
@@ -33,7 +12,7 @@
             "type": "Click"
         },
         "next": [
-            "Purchase"
+            "CountdownMonitor"
         ],
         "post_delay": 0,
         "pre_delay": 0,
@@ -54,40 +33,40 @@
         },
         "timeout": -1
     },
-    "Purchase": {
-        "$__mpe_code": {
-            "position": {
-                "x": -1174,
-                "y": 19
+
+    "CountdownMonitor": {
+        "recognition": {
+            "type": "Custom",
+            "param": {
+                "custom_recognition": "CountdownOCR",
+                "roi": [1033, 583, 111, 16]
             }
         },
         "action": {
+            "type": "DoNothing"
+        },
+        "next": [
+            "Purchase"
+        ],
+        "timeout": -1,
+        "rate_limit": 100,
+        "pre_delay": 0,
+        "post_delay": 0
+    },
+
+    "Purchase": {
+        "recognition": {
+            "type": "DirectHit"
+        },
+        "action": {
+            "type": "Custom",
             "param": {
                 "custom_action": "SmartClick",
-                "target": [
-                    781,
-                    454,
-                    63,
-                    25
-                ]
-            },
-            "type": "Custom"
+                "target": [713, 445, 203, 43]
+            }
         },
-        "post_delay": 0,
         "rate_limit": 50,
-        "recognition": {
-            "param": {
-                "roi": [
-                    788,
-                    425,
-                    25,
-                    11
-                ],
-                "template": [
-                    "0秒.png"
-                ]
-            },
-            "type": "TemplateMatch"
-        }
+        "pre_delay": 0,
+        "post_delay": 0
     }
 }

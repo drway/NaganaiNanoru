@@ -69,9 +69,15 @@
             "inputs": [
                 {
                     "name": "TargetTime",
-                    "label": "目标点击时间(空代表不等待)",
+                    "label": "目标点击时间(留空=由OCR自动推算)",
                     "default": "",
                     "pipeline_type": "string"
+                },
+                {
+                    "name": "JumpTimeEnabled",
+                    "label": "启用系统时间跳跃(1开启/0关闭，需管理员权限)",
+                    "default": "0",
+                    "pipeline_type": "int"
                 },
                 {
                     "name": "FixedEnabled",
@@ -180,6 +186,30 @@
                     "label": "高区间权重",
                     "default": "1",
                     "pipeline_type": "int"
+                },
+                {
+                    "name": "ConfirmTarget",
+                    "label": "确认区域中心点[x,y](720p)",
+                    "default": "[1088, 622]",
+                    "pipeline_type": "string"
+                },
+                {
+                    "name": "SecondConfirmTarget",
+                    "label": "二次确认区域中心点[x,y](720p)",
+                    "default": "[815, 467]",
+                    "pipeline_type": "string"
+                },
+                {
+                    "name": "ExitTarget",
+                    "label": "退出区域中心点[x,y](720p)",
+                    "default": "[649, 630]",
+                    "pipeline_type": "string"
+                },
+                {
+                    "name": "RefreshTarget",
+                    "label": "刷新区域中心点[x,y](720p)",
+                    "default": "[917, 117]",
+                    "pipeline_type": "string"
                 }
             ],
             "pipeline_override": {
@@ -188,6 +218,7 @@
                         "param": {
                             "custom_action_param": {
                                 "target_time": "{TargetTime}",
+                                "jump_time_enabled": "{JumpTimeEnabled}",
                                 "fixed_enabled": "{FixedEnabled}",
                                 "fixed_delay": "{FixedDelay}",
                                 "ultra_low_enabled": "{UltraLowEnabled}",
@@ -205,7 +236,11 @@
                                 "high_enabled": "{HighEnabled}",
                                 "high_min": "{HighMin}",
                                 "high_max": "{HighMax}",
-                                "high_weight": "{HighWeight}"
+                                "high_weight": "{HighWeight}",
+                                "confirm_target": "{ConfirmTarget}",
+                                "second_confirm_target": "{SecondConfirmTarget}",
+                                "exit_target": "{ExitTarget}",
+                                "refresh_target": "{RefreshTarget}"
                             }
                         }
                     }

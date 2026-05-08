@@ -12,7 +12,13 @@ NTP_SERVERS = [
     'ntp2.aliyun.com',
     'ntp.aliyun.com',
     'time2.aliyun.com',
-    'time4.aliyun.com'
+    'time4.aliyun.com',
+    'ntp.tencent.com',
+    'ntp1.tencent.com',
+    'ntp2.tencent.com',
+    'ntp3.tencent.com',
+    'ntp4.tencent.com',
+    'ntp5.tencent.com',
 ]
 
 def robust_weighted_average(offsets, rtts, servers, outlier_threshold=2.5):
@@ -64,10 +70,12 @@ def robust_weighted_average(offsets, rtts, servers, outlier_threshold=2.5):
     weights = []
     for i in range(len(final_offsets)):
         base_weight = 1 / (final_rtts[i] + 0.001)
-        server_weight = 1
+        server_weight = 1.0
         server = final_servers[i]
-        if 'aliyun' in server or '203.107.6.88' in server:
+        if 'aliyun' in server or 'tencent' in server:
             server_weight = 1.3
+        elif '203.107.6.88' in server:
+            server_weight = 1.2
         weights.append(base_weight * server_weight)
         
     weights = np.array(weights)
@@ -90,22 +98,24 @@ class MonotonicClock:
         self._offset = 0
         self._lock = threading.Lock()
         self._synced = False
-        
+        self._perf_base_time = None   # 用于 perf_counter 基准
+        self._perf_base_perf = None
+
     def sync_with_ntp(self, timeout=3, max_workers=5):
         client = ntplib.NTPClient()
         samples_offsets = []
         samples_rtts = []
         samples_servers = []
-        
+
         servers_to_try = random.sample(NTP_SERVERS, min(5, len(NTP_SERVERS)))
-        
+
         def query(server):
             try:
                 response = client.request(server, version=3, timeout=timeout)
                 return response.offset, response.delay, server
             except Exception:
                 return None
-                
+
         with ThreadPoolExecutor(max_workers=max_workers) as executor:
             futures = [executor.submit(query, s) for s in servers_to_try]
             for future in as_completed(futures):
@@ -114,15 +124,40 @@ class MonotonicClock:
                     samples_offsets.append(res[0])
                     samples_rtts.append(res[1])
                     samples_servers.append(res[2])
-                    
+
         if samples_offsets:
             avg_offset, _, _, _ = robust_weighted_average(samples_offsets, samples_rtts, samples_servers)
             if avg_offset is not None:
                 with self._lock:
                     self._offset = avg_offset
                     self._synced = True
+                    # 同步 perf_counter 基准（用于高精度 spin-lock）
+                    self._perf_base_time = time.time() + avg_offset
+                    self._perf_base_perf = time.perf_counter()
+                print(f"[NTP] 同步完成, offset={avg_offset*1000:.1f}ms")
                 return True
         return False
+
+    def _start_periodic_sync(self, interval=300):
+        """启动周期性 NTP 重同步 daemon 线程"""
+        def _sync_loop():
+            while True:
+                time.sleep(interval)
+                try:
+                    self.sync_with_ntp()
+                except Exception as e:
+                    print(f"[NTP] 周期性重同步失败: {e}")
+        t = threading.Thread(target=_sync_loop, daemon=True)
+        t.start()
+
+    def get_real_timestamp(self):
+        """返回基于 perf_counter 推算的真实时间戳（不受系统时间修改影响）"""
+        with self._lock:
+            if self._perf_base_time is not None:
+                elapsed = time.perf_counter() - self._perf_base_perf
+                return self._perf_base_time + elapsed
+            else:
+                return time.time()
 
     def now(self):
         with self._lock:
@@ -140,6 +175,7 @@ def get_clock():
     if _clock_instance is None:
         _clock_instance = MonotonicClock()
         _clock_instance.sync_with_ntp()
+        _clock_instance._start_periodic_sync(interval=300)
     return _clock_instance
 
 class DelayCalculator:
