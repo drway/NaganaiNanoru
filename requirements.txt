@@ -1,3 +1,3 @@
 ntplib
 numpy
-maafw
+maafw==5.10.4

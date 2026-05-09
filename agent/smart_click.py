@@ -140,7 +140,6 @@ class SmartClickAction(CustomAction):
         clock = get_clock()
         user_delay_ms, chosen_range = _calculator.get_click_delay(calc_config)
         user_delay_sec = user_delay_ms / 1000.0
-        print(f"[SmartClick] 选择模式: {chosen_range}, 延迟: {user_delay_ms}ms")
 
         # --- 从 OCR 获取目标时间戳 ---
         with _ocr_lock:
@@ -151,26 +150,24 @@ class SmartClickAction(CustomAction):
                 ocr_target_base_ts = None
 
         if _ocr_base is None:
-            print("[SmartClick] OCR 时间戳未就绪，跳过本次")
+            print("[抢购] OCR 时间戳未就绪，跳过本次")
             return False
 
         sale_ts = _ocr_sale
         target_ts = _ocr_base + user_delay_sec
-        print(f"[SmartClick] OCR 推算: sale_ts={sale_ts}, target_ts={target_ts}")
+        target_str = datetime.datetime.fromtimestamp(target_ts).strftime('%H:%M:%S.%f')[:-3]
+        print(f"[抢购] 选择模式: {chosen_range}, 延迟: {user_delay_ms}ms")
+        print(f"[抢购] 目标真实时刻: {target_str}")
 
         # ========== 还原原版完整抢购流程 ==========
 
-        # Step 1: 点击"确认区域"（预操作）
-        print(f"[SmartClick] Step1: 点击确认区域 {confirm_target}")
+        # Step 1: 点击"确认区域"
+        print(f"[抢购] 点击确认区域")
         _cx, _cy = _rand_xy(confirm_target)
         context.tasker.controller.post_click(_cx, _cy).wait()
 
-        # Step 2: 日志
-        print(f"[SmartClick] 目标真实时刻: {datetime.datetime.fromtimestamp(target_ts)}")
-        print("[SmartClick] Step3: 忙等到目标时刻...")
-
         # Step 3: perf_counter spin-lock 精确等待
-        # 将 target_ts 转换为 perf_counter 域
+        print("[等待] 忙等到目标时刻...")
         real_ts_now = clock.get_real_timestamp()
         perf_now = time.perf_counter()
         target_perf = perf_now + (target_ts - real_ts_now)
@@ -181,48 +178,42 @@ class SmartClickAction(CustomAction):
             if now_perf >= target_perf:
                 break
             remaining = target_perf - now_perf
-            # 原版：提前 50ms 触发 jump_time(1000)
             if jump_enabled and remaining <= 0.05 and not jump_triggered:
                 threading.Thread(target=jump_time, args=(1000,), daemon=True).start()
                 jump_triggered = True
-                print("[SmartClick] 异步跳跃已启动 (提前50ms)")
+                print("[跳跃] 异步跳跃已启动 (提前50ms)")
             if remaining > 0.01:
                 time.sleep(0.001)
-            # < 10ms 时忙等待（空转）
 
         # Step 4: 精确时刻到达 → 点击"二次确认区域"
-        print(f"[SmartClick] Step4: 精确时刻到达，点击二次确认区域 {second_confirm_target}")
         _cx, _cy = _rand_xy(second_confirm_target)
         context.tasker.controller.post_click(_cx, _cy).wait()
 
-        # 记录误差日志
+        # 记录误差
         actual_ts = clock.get_real_timestamp()
+        actual_str = datetime.datetime.fromtimestamp(actual_ts).strftime('%H:%M:%S.%f')[:-3]
         error_ms = (actual_ts - target_ts) * 1000.0
-        if sale_ts:
-            total_ms = (actual_ts - sale_ts) * 1000.0
-        else:
-            total_ms = 0
-        print(f"[SmartClick] 点击完成: 模式={chosen_range}, "
-              f"设置延迟={user_delay_ms}ms, 物理误差={error_ms:.2f}ms, "
-              f"总耗时={total_ms:.2f}ms")
+        total_ms = (actual_ts - sale_ts) * 1000.0 if sale_ts else 0
+        print(f"[点击完成] 模式={chosen_range}, 设置延迟: {user_delay_ms}ms | "
+              f"物理误差: {error_ms:.2f}ms | 总耗时: {total_ms:.2f}ms | 点击时刻: {actual_str}")
 
         # Step 5: 点击"退出区域"
         time.sleep(0.1)
-        print(f"[SmartClick] Step5: 点击退出区域 {exit_target}")
+        print("[流程] 点击退出区域")
         _cx, _cy = _rand_xy(exit_target)
         context.tasker.controller.post_click(_cx, _cy).wait()
 
         # Step 6: 等待后点击"刷新区域"，NTP 重同步
         time.sleep(3.0)
-        print(f"[SmartClick] Step6: 点击刷新区域 {refresh_target}")
+        print("[流程] 点击刷新区域，准备下一轮")
         _cx, _cy = _rand_xy(refresh_target)
         context.tasker.controller.post_click(_cx, _cy).wait()
 
         # NTP 重同步
+        print("[NTP] 开始重同步...")
         try:
             clock.sync_with_ntp()
-            print("[SmartClick] NTP 重同步完成")
         except Exception as e:
-            print(f"[SmartClick] NTP 重同步失败: {e}")
+            print(f"[NTP] 重同步失败: {e}")
 
         return True

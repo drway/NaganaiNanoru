@@ -4,6 +4,9 @@ import glob
 import pathlib
 import ctypes
 
+# Redirect stderr to stdout so exceptions in ctypes callbacks appear in MFAAvalonia log
+sys.stderr = sys.stdout
+
 dir_path = os.path.dirname(os.path.realpath(__file__))
 target_bin = os.path.abspath(os.path.join(dir_path, "..", "deps", "bin"))
 
@@ -27,6 +30,7 @@ if dll_dir.exists():
         os.add_dll_directory(str(dll_dir))
 
 print(f"[DLLInit] dll_dir = {dll_dir}")
+print(f"[maa] package: {pathlib.Path(_maa_pkg.__file__).parent}")
 
 # opencv_world4_maa.dll has a DllMain null-pointer crash under certain ASLR
 # base addresses in Python processes. Pre-mapping it with DONT_RESOLVE_DLL_REFERENCES
@@ -70,18 +74,34 @@ for _dll_name in _DLL_LOAD_ORDER:
 
 Library.open(dll_dir, agent_server=True)
 
+print(f"[Agent] 开始导入模块...")
 import my_action
 import my_reco
 import smart_click
+print(f"[Agent] 模块导入完成")
 
 
 def main():
     if len(sys.argv) < 2:
         print("Usage: python main.py <socket_id>")
         sys.exit(1)
-    socket_id = sys.argv[-1]
-    AgentServer.start_up(socket_id)
-    AgentServer.join()
+    socket_id = sys.argv[1]
+    ok = AgentServer.start_up(socket_id)
+    print(f"[Agent] start_up={'OK' if ok else 'FAIL'}")
+    if not ok:
+        return
+
+    import threading
+    from smart_logic import get_clock
+    threading.Thread(target=get_clock, daemon=True).start()
+
+    try:
+        AgentServer.join()
+    except Exception as _e:
+        import traceback
+        print(f"[Agent] join 异常: {_e}")
+        traceback.print_exc()
+    print(f"[Agent] join 已返回")
     AgentServer.shut_down()
 
 

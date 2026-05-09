@@ -124,19 +124,30 @@ class MonotonicClock:
                     samples_offsets.append(res[0])
                     samples_rtts.append(res[1])
                     samples_servers.append(res[2])
+                    print(f"[NTP] {res[2]} 可用 - 延迟: {res[1]*1000:.2f}ms, 偏移: {res[0]*1000:.2f}ms")
 
-        if samples_offsets:
-            avg_offset, _, _, _ = robust_weighted_average(samples_offsets, samples_rtts, samples_servers)
-            if avg_offset is not None:
-                with self._lock:
-                    self._offset = avg_offset
-                    self._synced = True
-                    # 同步 perf_counter 基准（用于高精度 spin-lock）
-                    self._perf_base_time = time.time() + avg_offset
-                    self._perf_base_perf = time.perf_counter()
-                print(f"[NTP] 同步完成, offset={avg_offset*1000:.1f}ms")
-                return True
-        return False
+        if not samples_offsets:
+            print("[NTP] 所有服务器均不可用")
+            return False
+
+        avg_offset, avg_rtt, best_server, n = robust_weighted_average(
+            samples_offsets, samples_rtts, samples_servers)
+        if avg_offset is None:
+            return False
+
+        with self._lock:
+            self._offset = avg_offset
+            self._synced = True
+            self._perf_base_time = time.time() + avg_offset
+            self._perf_base_perf = time.perf_counter()
+            synced_real = self._perf_base_time
+
+        now_str = datetime.datetime.fromtimestamp(synced_real).strftime('%H:%M:%S.%f')[:-3]
+        print(f"[NTP] 同步完成 | 参与服务器: {n}/{len(samples_offsets)} | "
+              f"加权偏移: {avg_offset*1000:.2f}ms | 加权RTT: {avg_rtt*1000:.2f}ms | "
+              f"最优: {best_server}")
+        print(f"[基准] 当前真实时间: {now_str}")
+        return True
 
     def _start_periodic_sync(self, interval=300):
         """启动周期性 NTP 重同步 daemon 线程"""
@@ -174,7 +185,11 @@ def get_clock():
     global _clock_instance
     if _clock_instance is None:
         _clock_instance = MonotonicClock()
-        _clock_instance.sync_with_ntp()
+        print("[基准] 正在与 NTP 建立时间基准...")
+        ok = _clock_instance.sync_with_ntp()
+        if not ok:
+            fallback = datetime.datetime.fromtimestamp(time.time()).strftime('%H:%M:%S.%f')[:-3]
+            print(f"[基准] NTP 失败，使用本地时间 (误差可能增大): {fallback}")
         _clock_instance._start_periodic_sync(interval=300)
     return _clock_instance
 

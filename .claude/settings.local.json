@@ -12,7 +12,29 @@
       "Bash(Format-List)",
       "Bash(Get-ChildItem -Path \"C:\\\\Users\\\\wzy02\\\\Downloads\\\\MaaDelta-win-x86_64\\\\\" -ErrorAction SilentlyContinue | Select-Object Name, PSIsContainer)",
       "PowerShell(cmd /c \"dir /a /b \"\"C:\\\\Users\\\\wzy02\\\\Downloads\\\\MaaDelta-win-x86_64\"\"\")",
-      "PowerShell(cmd /c \"dir /a /b /s \"\"C:\\\\Users\\\\wzy02\\\\Downloads\\\\MaaDelta-win-x86_64\\\\runtimes\"\"\")"
+      "PowerShell(cmd /c \"dir /a /b /s \"\"C:\\\\Users\\\\wzy02\\\\Downloads\\\\MaaDelta-win-x86_64\\\\runtimes\"\"\")",
+      "Bash(python -c \"import maa; import pathlib; print\\(pathlib.Path\\(maa.__file__\\).parent\\)\")",
+      "Bash(where python *)",
+      "Bash(py -c \"import maa; import pathlib; print\\(pathlib.Path\\(maa.__file__\\).parent\\)\")",
+      "Bash(C:/ProgramData/anaconda3/python.exe -c \"import maa; import pathlib; print\\(pathlib.Path\\(maa.__file__\\).parent\\)\")",
+      "Bash(C:/ProgramData/anaconda3/python.exe -c \"import maa; print\\(getattr\\(maa, '__version__', 'no __version__'\\)\\)\")",
+      "Bash(C:/ProgramData/anaconda3/python.exe -m pip show maa)",
+      "Bash(C:/ProgramData/anaconda3/python.exe -m pip show maa-framework)",
+      "Bash(C:/ProgramData/anaconda3/python.exe -m pip list)",
+      "Bash(find \"C:/Users/wzy02/Downloads/MaaDelta-win-x86_64 \\(1\\)\" -name \"library.py\" -o -name \"agent_server.py\" 2>/dev/null | head -10)",
+      "Read(//c/Users/wzy02/Downloads/MaaDelta-win-x86_64 \\(1\\)/**)",
+      "Bash(C:/ProgramData/anaconda3/python.exe -c \"import maa; import pathlib; p = pathlib.Path\\(maa.__file__\\).parent; print\\(p\\); import subprocess; result = subprocess.run\\(['git', '-C', str\\(p\\), 'log', '--oneline', '-1'], capture_output=True, text=True\\); print\\(result.stdout.strip\\(\\) or 'no git'\\)\")",
+      "Bash(C:/ProgramData/anaconda3/python.exe -m pip show MaaFw)",
+      "Bash(C:/ProgramData/anaconda3/python.exe -m pip index versions maafw)",
+      "Bash(C:/ProgramData/anaconda3/python.exe -m pip install \"maafw==5.10.4\")",
+      "Bash(C:/Users/wzy02/.virtualenvs/wzy02-IgPcF5wU/Scripts/python.exe --version)",
+      "Bash(C:/Users/wzy02/.virtualenvs/wzy02-IgPcF5wU/Scripts/python.exe -m pip show MaaFw)",
+      "Bash(C:/ProgramData/anaconda3/python.exe --version)",
+      "Bash(C:/ProgramData/anaconda3/python.exe -c \"import sys; print\\(sys.executable\\); print\\(sys.version\\)\")",
+      "Bash(C:/ProgramData/anaconda3/python.exe -c \"import maa; import pathlib; print\\('maa from:', pathlib.Path\\(maa.__file__\\).parent\\)\")",
+      "Bash(head -50 \"C:/Users/wzy02/AppData/Roaming/Python/Python312/site-packages/maa/custom_recognition.py\" 2>&1)",
+      "Read(//c/Users/wzy02/AppData/Roaming/Python/Python312/site-packages/maa/**)",
+      "PowerShell(Copy-Item \"e:\\\\delta\\\\Delta\\\\agent\\\\main.py\" \"C:\\\\Users\\\\wzy02\\\\Downloads\\\\MaaDelta-win-x86_64 \\(1\\)\\\\agent\\\\main.py\" -Force)"
     ]
   }
 }

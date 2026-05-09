@@ -46,6 +46,20 @@ class CountdownOCR(CustomRecognition):
         context: Context,
         argv: CustomRecognition.AnalyzeArg,
     ) -> CustomRecognition.AnalyzeResult:
+        print(f"[CountdownOCR] analyze entered | roi={argv.roi} | image_type={type(argv.image).__name__}")
+        try:
+            return self._analyze_impl(context, argv)
+        except Exception as e:
+            import traceback
+            print(f"[CountdownOCR] 异常: {e}")
+            print(traceback.format_exc())
+            return None
+
+    def _analyze_impl(
+        self,
+        context: Context,
+        argv: CustomRecognition.AnalyzeArg,
+    ) -> CustomRecognition.AnalyzeResult:
 
         # 解析 custom_recognition_param 以获取刷新区域坐标
         reco_param = {}
@@ -86,7 +100,8 @@ class CountdownOCR(CustomRecognition):
         if total_seconds is None:
             return None
 
-        print(f"[CountdownOCR] 解析: '{text}' → 总秒数: {total_seconds}")
+        now_str = datetime.datetime.now().strftime('%H:%M:%S.%f')[:-3]
+        print(f"[OCR] 解析总秒数: {total_seconds}  ({now_str})")
 
         # 去重：秒数没有变化时不重复处理
         if total_seconds == self._last_total_seconds:
@@ -95,25 +110,25 @@ class CountdownOCR(CustomRecognition):
 
         # 在 16/12/7 秒时触发刷新（通过 context 点击刷新区域）
         if total_seconds in [16, 12, 7]:
-            print(f"[CountdownOCR] 倒计时{total_seconds}秒，触发刷新")
+            print(f"[流程] 倒计时 {total_seconds}s，触发刷新")
             try:
                 _rx = refresh_target[0] + (refresh_target[2] // 2 if len(refresh_target) == 4 else 0)
                 _ry = refresh_target[1] + (refresh_target[3] // 2 if len(refresh_target) == 4 else 0)
                 context.tasker.controller.post_click(_rx, _ry).wait()
             except Exception as e:
-                print(f"[CountdownOCR] 刷新点击失败: {e}")
-            return None  # 还不到触发时机，继续监控
+                print(f"[流程] 刷新点击失败: {e}")
+            return None
 
         # 在 2 秒时输出准备日志
         if total_seconds == 2:
-            print("[CountdownOCR] 倒计时2秒，准备抢购")
+            print("[状态] 倒计时2秒，准备抢购")
             return None
 
         # ★ 核心逻辑：倒计时 == 3 秒时锁定目标时间
         if total_seconds == 3:
             clock = get_clock()
             sale_ts = int(clock.get_real_timestamp())
-            print(f"[CountdownOCR] 记录3秒整秒时刻: {datetime.datetime.fromtimestamp(sale_ts)}")
+            print(f"[抢购] 记录3秒整秒时刻: {datetime.datetime.fromtimestamp(sale_ts).strftime('%H:%M:%S')}")
 
             # 写入共享变量供 SmartClick 使用（加锁保护）
             with smart_click._ocr_lock:
